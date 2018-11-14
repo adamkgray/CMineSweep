@@ -15,14 +15,18 @@
 #include "definitions.h"
 
 int main(int argc, char ** argv) {
-    /* Start curses */
+    /* Create screen */
     initscr();
+    /* Disable default keyboard echo to screen */
     noecho();
+    /* Input is immediately available to program, no need for newline */
     cbreak();
+    /* Hide terminal cursor */
     curs_set(0);
+    /* Enable colors */
     start_color();
+    /* Clear the terminal */
     clear();
-    refresh();
 
     /* Cursor highlighting */
     init_pair(CURSOR, COLOR_BLACK, COLOR_RED);
@@ -30,11 +34,14 @@ int main(int argc, char ** argv) {
 
     /* Create grid */
     grid * p_grid = (grid *)malloc(sizeof(grid));
+    /* Exit if allocation failed */
     if (p_grid == NULL) {
+        free(p_grid);
         endwin();
         return 1;
     }
 
+    /* Scale */
     int8_t width = 15;
     int8_t height = 15;
     int16_t minefield_size = width * height;
@@ -49,12 +56,14 @@ int main(int argc, char ** argv) {
     p_grid->cursor = (minefield_size / 2);
 
     /* Create minefield */
-    int8_t * minefield = (int8_t *)malloc(minefield_size * sizeof(int8_t));
-    if (minefield == NULL) {
+    int8_t * p_minefield = (int8_t *)malloc(minefield_size * sizeof(int8_t));
+    /* Exit if allocation failed */
+    if (p_minefield == NULL) {
+        free(p_minefield);
         endwin();
         return 1;
     }
-    p_grid->minefield = minefield;
+    p_grid->minefield = p_minefield;
 
     /* Fill minefield with mines and adjacent-to-mine values */
     initialize_minefield(p_grid);
@@ -75,7 +84,12 @@ int main(int argc, char ** argv) {
     while (input(p_grid))
         ;
 
-    getch();
+    /* Stop curses */
     endwin();
+
+    /* Free allocated memory before exiting */
+    free(p_grid);
+    free(p_minefield);
+
     return 0;
 }

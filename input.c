@@ -4,6 +4,8 @@ int8_t input(grid * p_grid) {
     int16_t c = getch();
     switch (c) {
         /* DIG */
+        case 'q':
+            return 0;
         case 'd':
             /* Reveal this space and, recursively, all the surrounding spaces that may be empty */
             reveal(p_grid, p_grid->cursor);
@@ -16,9 +18,10 @@ int8_t input(grid * p_grid) {
         case 'f':
             /* Flag if not uncovered */
             if (!(p_grid->minefield[p_grid->cursor] & UNCOVERED)) {
+                mvprintw(0, 0, "FLAG!"); refresh();
                 p_grid->minefield[p_grid->cursor] |= FLAGGED;
                 p_grid->flags += 1;
-                render_mine(p_grid, p_grid->cursor, 0);
+                render_mine(p_grid, p_grid->cursor, 1);
             }
 
             /* Unflag if flagged */

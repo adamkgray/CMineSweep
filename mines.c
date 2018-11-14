@@ -110,21 +110,21 @@ void render_mine(grid * p_grid, int16_t i, int8_t is_cursor) {
         attron(COLOR_PAIR(CURSOR));
     }
 
-    int8_t * p_minefield = (p_grid->minefield + i);
+    int8_t space = p_grid->minefield[i];
 
     /* Compute pixel value */
     int32_t pixel = ACS_CKBOARD;
-    if (*p_minefield & UNCOVERED) {
-        if (*p_minefield & MINE) {
+    if (space & UNCOVERED) {
+        if (space & MINE) {
             pixel = ACS_DEGREE;
         } else {
-            if (*p_minefield == EMPTY) {
+            if (space == EMPTY) {
                 pixel = ' ';
             } else {
-                pixel = '0' + (*p_minefield & VALUE);
+                pixel = '0' + (space & VALUE);
             }
         }
-    } else if (*p_minefield & FLAGGED) {
+    } else if (space & FLAGGED) {
         pixel = ACS_LANTERN;
     }
 
