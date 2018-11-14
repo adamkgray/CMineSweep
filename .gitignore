@@ -1,3 +1,4 @@
 minesweeper.*
 minesweeper
 *.o
+*.swp
