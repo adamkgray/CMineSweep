@@ -8,7 +8,7 @@ default:	all
 all:	minesweeper
 
 clean:
-	rm minesweeper > /dev/null 2>&1
+	rm minesweeper
 
 minesweeper:
 	$(CC) $(CFLAGS) -o minesweeper $(MAIN) $(CURSES)
