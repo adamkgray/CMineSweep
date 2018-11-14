@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include "definitions.h"
 #include "grid.h"
+#include "render_menu.h"
+
 void initialize_minefield(grid * p_grid);
 void render_minefield(grid * p_grid);
 void render_mine(grid * p_grid, int16_t i, int8_t is_cursor);

@@ -8,4 +8,5 @@ void render_menu(grid * p_grid) {
         p_grid->mines,
         p_grid->flags
     );
+    refresh();
 }

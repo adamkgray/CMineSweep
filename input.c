@@ -16,19 +16,19 @@ int8_t input(grid * p_grid) {
             break;
         /* FLAG */
         case 'f':
-            /* Flag if not uncovered */
-            if (!(p_grid->minefield[p_grid->cursor] & UNCOVERED)) {
-                mvprintw(0, 0, "FLAG!"); refresh();
+            /* Only flag spaces that are covered and not flagged */
+            if (!(p_grid->minefield[p_grid->cursor] & UNCOVERED) && !(p_grid->minefield[p_grid->cursor] & FLAGGED)) {
                 p_grid->minefield[p_grid->cursor] |= FLAGGED;
                 p_grid->flags += 1;
                 render_mine(p_grid, p_grid->cursor, 1);
-            }
+                render_menu(p_grid);
 
-            /* Unflag if flagged */
-            if (p_grid->minefield[p_grid->cursor] & FLAGGED) {
+            /* Only unflag spaces that are covered and flagged */
+            } else if (!(p_grid->minefield[p_grid->cursor] & UNCOVERED) && (p_grid->minefield[p_grid->cursor] & FLAGGED)) {
                 p_grid->minefield[p_grid->cursor] &= ~FLAGGED;
                 p_grid->flags -= 1;
                 render_mine(p_grid, p_grid->cursor, 1);
+                render_menu(p_grid);
             }
 
             break;

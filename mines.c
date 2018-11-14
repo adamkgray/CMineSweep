@@ -1,5 +1,86 @@
 #include "mines.h"
 
+void render_mine(grid * p_grid, int16_t i, int8_t is_cursor) {
+    /* Turn on cursor */
+    if (is_cursor) {
+        attron(COLOR_PAIR(CURSOR));
+    }
+
+    /* Get value of space at i */
+    int8_t space = p_grid->minefield[i];
+
+    /* Compute pixel value */
+    int32_t pixel = ACS_CKBOARD;
+    if (space & UNCOVERED) {
+        if (space & MINE) {
+            pixel = ACS_DEGREE;
+        } else {
+            if ((space & VALUE) == EMPTY) {
+                pixel = ' ';
+            } else {
+                pixel = '0' + (space & VALUE);
+            }
+        }
+    } else if (space & FLAGGED) {
+        pixel = ACS_PLMINUS;
+    }
+
+    mvaddch(
+        p_grid->y_offset + (i / p_grid->width),
+        p_grid->x_offset + (2 * (i % p_grid->width)),
+        pixel
+    );
+
+    /* Turn off cursor */
+    if (is_cursor) {
+        attroff(COLOR_PAIR(CURSOR));
+    }
+}
+
+void render_minefield(grid * p_grid) {
+    int8_t * p_minefield = p_grid->minefield;
+    int16_t minefield_size = p_grid->width * p_grid->height;
+
+    for (int16_t i = 0; i < minefield_size; ++i) {
+        /* Show cursor */
+        if (i == p_grid->cursor) {
+            attroff(COLOR_PAIR(FLAG));
+            attron(COLOR_PAIR(CURSOR));
+        }
+
+        /* Compute pixel value */
+        int32_t pixel = ACS_CKBOARD;
+        if (*p_minefield & UNCOVERED) {
+            if (*p_minefield & MINE) {
+                pixel = ACS_DEGREE;
+            } else {
+                if ((*p_minefield & VALUE) == EMPTY) {
+                    pixel = ' ';
+                } else {
+                    pixel = '0' + (*p_minefield & VALUE);
+                }
+            }
+        } else if (*p_minefield & FLAGGED) {
+            mvprintw(2, 0, "flag pixel changed"); refresh();
+            pixel = ACS_PLMINUS;
+        }
+
+
+        /* Render to screen */
+        mvaddch(
+            p_grid->y_offset + (i / p_grid->width),
+            p_grid->x_offset + (2 * (i % p_grid->width)),
+            pixel
+        );
+
+        /* Turn off highlighting */
+        attroff(COLOR_PAIR(CURSOR));
+
+        /* Increment minefield pointer */
+        ++p_minefield;
+    }
+}
+
 void initialize_minefield(grid * p_grid) {
     srand(time(NULL));
     int8_t width = p_grid->width;
@@ -58,83 +139,5 @@ void initialize_minefield(grid * p_grid) {
         }
         ++p_minefield;
     }
-}
-
-
-void render_minefield(grid * p_grid) {
-    int8_t * p_minefield = p_grid->minefield;
-    int16_t minefield_size = p_grid->width * p_grid->height;
-
-    for (int16_t i = 0; i < minefield_size; ++i) {
-        /* Show cursor */
-        if (i == p_grid->cursor) {
-            attroff(COLOR_PAIR(FLAG));
-            attron(COLOR_PAIR(CURSOR));
-        }
-
-        /* Compute pixel value */
-        int32_t pixel = ACS_CKBOARD;
-        if (*p_minefield & UNCOVERED) {
-            if (*p_minefield & MINE) {
-                pixel = ACS_DEGREE;
-            } else {
-                if (*p_minefield == EMPTY) {
-                    pixel = ' ';
-                } else {
-                    pixel = '0' + (*p_minefield & VALUE);
-                }
-            }
-        } else if (*p_minefield & FLAGGED) {
-            pixel = ACS_LANTERN;
-        }
-
-
-        /* Render to screen */
-        mvaddch(
-            p_grid->y_offset + (i / p_grid->width),
-            p_grid->x_offset + (2 * (i % p_grid->width)),
-            pixel
-        );
-
-        /* Turn off highlighting */
-        attroff(COLOR_PAIR(CURSOR));
-
-        /* Increment minefield pointer */
-        ++p_minefield;
-    }
-}
-
-void render_mine(grid * p_grid, int16_t i, int8_t is_cursor) {
-    /* Turn on cursor */
-    if (is_cursor) {
-        attron(COLOR_PAIR(CURSOR));
-    }
-
-    int8_t space = p_grid->minefield[i];
-
-    /* Compute pixel value */
-    int32_t pixel = ACS_CKBOARD;
-    if (space & UNCOVERED) {
-        if (space & MINE) {
-            pixel = ACS_DEGREE;
-        } else {
-            if (space == EMPTY) {
-                pixel = ' ';
-            } else {
-                pixel = '0' + (space & VALUE);
-            }
-        }
-    } else if (space & FLAGGED) {
-        pixel = ACS_LANTERN;
-    }
-
-    mvaddch(
-        p_grid->y_offset + (i / p_grid->width),
-        p_grid->x_offset + (2 * (i % p_grid->width)),
-        pixel
-    );
-
-    attroff(COLOR_PAIR(CURSOR));
-    attroff(COLOR_PAIR(FLAG));
 }
 
