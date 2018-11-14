@@ -60,20 +60,20 @@ int main(int argc, char ** argv) {
     initialize_minefield(p_grid);
 
     /* Render menu */
-    //render_menu(p_grid);
+    render_menu(p_grid);
 
     /* Render outlines */
-    //render_outlines(p_grid);
+    render_outlines(p_grid);
 
     /* Render minefield */
     render_minefield(p_grid);
 
     /* Refresh page to show initial render */
-    //refresh();
+    refresh();
 
     /* Gameplay */
-    //while (input(p_grid))
-        //;
+    while (input(p_grid))
+        ;
 
     getch();
     endwin();
