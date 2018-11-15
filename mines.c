@@ -1,15 +1,24 @@
 #include "mines.h"
 
 void render_mine(grid * p_grid, int16_t i, int8_t is_cursor) {
-    /* Turn on cursor */
-    if (is_cursor) {
-        attron(COLOR_PAIR(CURSOR));
-    }
-
     /* Get value of space at i */
     int8_t space = p_grid->minefield[i];
 
-    /* Compute pixel value */
+    /* Turn on flag */
+    if (space & FLAGGED) {
+        attron(COLOR_PAIR(FLAG));
+    }
+
+    /* Turn on cursor */
+    if (is_cursor) {
+        /* Turn off flag if it's flagged */
+        if (space & FLAGGED) {
+            attroff(COLOR_PAIR(FLAG));
+        }
+        attron(COLOR_PAIR(CURSOR));
+    }
+
+    /* Compute pixel value (ncurses ACS need 32 bits) */
     int32_t pixel = ACS_CKBOARD;
     if (space & UNCOVERED) {
         if (space & MINE) {
@@ -31,54 +40,38 @@ void render_mine(grid * p_grid, int16_t i, int8_t is_cursor) {
         pixel
     );
 
-    /* Turn off cursor */
-    if (is_cursor) {
+    /* Turn of flag */
+    if ((space & FLAGGED) && !is_cursor) {
+        attroff(COLOR_PAIR(FLAG));
+    } else if (is_cursor) {
         attroff(COLOR_PAIR(CURSOR));
     }
+
 }
 
 void render_minefield(grid * p_grid) {
     int8_t * p_minefield = p_grid->minefield;
-    int16_t minefield_size = p_grid->width * p_grid->height;
-
-    for (int16_t i = 0; i < minefield_size; ++i) {
-        /* Show cursor */
-        if (i == p_grid->cursor) {
-            attroff(COLOR_PAIR(FLAG));
-            attron(COLOR_PAIR(CURSOR));
-        }
-
-        /* Compute pixel value */
-        int32_t pixel = ACS_CKBOARD;
-        if (*p_minefield & UNCOVERED) {
-            if (*p_minefield & MINE) {
-                pixel = ACS_DEGREE;
-            } else {
-                if ((*p_minefield & VALUE) == EMPTY) {
-                    pixel = ' ';
-                } else {
-                    pixel = '0' + (*p_minefield & VALUE);
-                }
-            }
-        } else if (*p_minefield & FLAGGED) {
-            mvprintw(2, 0, "flag pixel changed"); refresh();
-            pixel = ACS_PLMINUS;
-        }
-
-
-        /* Render to screen */
+    for (int16_t i = 0; i < (p_grid->width * p_grid->height); ++i) {
+        /* Render covered mine to screen */
         mvaddch(
             p_grid->y_offset + (i / p_grid->width),
             p_grid->x_offset + (2 * (i % p_grid->width)),
-            pixel
+            ACS_CKBOARD
         );
-
-        /* Turn off highlighting */
-        attroff(COLOR_PAIR(CURSOR));
 
         /* Increment minefield pointer */
         ++p_minefield;
     }
+
+    /* Render cursor */
+    attron(COLOR_PAIR(CURSOR));
+    mvaddch(
+        p_grid->y_offset + (p_grid->cursor / p_grid->width),
+        p_grid->x_offset + (2 * (p_grid->cursor % p_grid->width)),
+        ACS_CKBOARD
+    );
+    attroff(COLOR_PAIR(CURSOR));
+
 }
 
 void initialize_minefield(grid * p_grid) {
@@ -93,6 +86,7 @@ void initialize_minefield(grid * p_grid) {
         /* Space is default empty, but has 4 chances to become a MINE */
         *p_minefield = ((rand() & 1) && (rand() & 1) && (rand() & 1) && (rand() & 1)) ? MINE : EMPTY;
 
+        /* Add some other mines around this mine */
         if (*p_minefield == MINE) {
             p_grid->mines += 1;
 
@@ -127,15 +121,45 @@ void initialize_minefield(grid * p_grid) {
     p_minefield = p_grid->minefield;
     for (int16_t i = 0; i < minefield_size; ++i) {
         if (!(*p_minefield)) {
-            *p_minefield = 
-                ((i < width) ? 0 : (i % width) ? 0 : (p_grid->minefield[i - width - 1] == MINE) ? 1 : 0)
-                + ((i < width) ? 0 : (p_grid->minefield[i - width] == MINE) ? 1 : 0)
-                + ((i < width) ? 0 : ((i + 1) % width == 0) ? 0 : (p_grid->minefield[i - width + 1] == MINE) ? 1 : 0)
-                + ((i % width == 0) ? 0 : (p_grid->minefield[i - 1] == MINE) ? 1 : 0)
-                + (((i + 1) % width == 0) ? 0 : (p_grid->minefield[i + 1] == MINE) ? 1 : 0)
-                + ((i >= ((width * height) - width)) ? 0 : (i % width == 0) ? 0 : (p_grid->minefield[i + width -1] == MINE) ? 1 : 0)
-                + ((i >= ((width * height) - width)) ? 0 : (p_grid->minefield[i + width] == MINE) ? 1 : 0)
-                + ((i >= ((width * height) - width)) ? 0 : ((i + 1) % width == 0) ? 0 : (p_grid->minefield[i + width + 1] == MINE) ? 1 : 0);
+            /* Upper left */
+            if ((i >= width) && (i % width != 0) && (p_grid->minefield[i - width - 1] == MINE)) {
+                ++(*p_minefield);
+            }
+
+            /* Above */
+            if ((i >= width) && (p_grid->minefield[i - width] == MINE)) {
+                ++(*p_minefield);
+            }
+
+            /* Upper right */
+            if ((i >= width) && ((i + 1) % width != 0) && (p_grid->minefield[i - width + 1] == MINE)) {
+                ++(*p_minefield);
+            }
+
+            /* Left */
+            if ((i % width != 0) && (p_grid->minefield[i - 1] == MINE)) {
+                ++(*p_minefield);
+            }
+
+            /* Right */
+            if (((i + 1) % width != 0) && (p_grid->minefield[i + 1] == MINE)) {
+                ++(*p_minefield);
+            }
+
+            /* Bottom left */
+            if ((i < (minefield_size - width)) && (i % width != 0) && (p_grid->minefield[i + width - 1] == MINE)) {
+                ++(*p_minefield);
+            }
+
+            /* Below */
+            if ((i < (minefield_size - width)) && (p_grid->minefield[i + width] == MINE)) {
+                ++(*p_minefield);
+            }
+
+            /* Bottom right */
+            if ((i < (minefield_size - width)) && ((i + 1) % width != 0) && (p_grid->minefield[i + width + 1] == MINE)) {
+                ++(*p_minefield);
+            }
         }
         ++p_minefield;
     }
