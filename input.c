@@ -33,7 +33,7 @@ int8_t input(grid * p_grid) {
                 mvprintw(
                     p_grid->y_offset + p_grid->height + 3,
                     p_grid->x_offset,
-                    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                    "YOU LOSE :(   "
                 );
                 /* Wait for any input */
                 getch();
@@ -99,7 +99,7 @@ int8_t input(grid * p_grid) {
         mvprintw(
                 p_grid->y_offset + p_grid->height + 3,
                 p_grid->x_offset,
-                "WINNER WINNER WINNER WINNER"
+                "YOU WIN :)    "
                 );
         getch();
         /* QUIT */
