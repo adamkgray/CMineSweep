@@ -17,6 +17,50 @@
 #include "definitions.h"
 
 int main(int argc, char ** argv) {
+    /* Scale */
+    int8_t width = 10;
+    int8_t height = 10;
+
+    /* Parse args */
+    if (argc > 1) {
+        for (int8_t i = 1; i < argc; ++i) {
+            char * arg = argv[i];
+            /* Width */
+            if (strcmp(arg, "-W") == 0) {
+                if (i + 1 < argc) {
+                    ++i;
+                    width = atoi(argv[i]);
+                    if (width == 0 || width < 8) {
+                        /* Deafult is 10 */
+                        width = 10;
+                    }
+                } else {
+                    fprintf(stderr, "%s: No value provided for -W option\n", argv[0]);
+                    return 1;
+                }
+            /* Height */
+            } else if (strcmp(arg, "-H") == 0) {
+                if (i + 1 < argc) {
+                    ++i;
+                    height = atoi(argv[i]);
+                    if (height == 0 || height < 8) {
+                        /* Deafult is 10 */
+                        height = 10;
+                    }
+                } else {
+                    fprintf(stderr, "%s: No value provided for -H option\n", argv[0]);
+                    return 1;
+                }
+            } else if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
+                printf("Usage: %s\n-H height -> The height of the minefield. Default 10\n-W width -> The width of the minefield. Default 10\n", argv[0]);
+                return 0;
+            } else {
+                fprintf(stderr, "Usage: %s\n-H height -> The height of the minefield. Default 10\n-W width -> The width of the minefield. Default 10\n", argv[0]);
+                return 1;
+            }
+        }
+    }
+
     /* Create screen */
     initscr();
     /* Disable default keyboard echo to screen */
@@ -30,37 +74,6 @@ int main(int argc, char ** argv) {
     /* Clear the terminal */
     clear();
 
-    /* Scale */
-    int8_t width = 10;
-    int8_t height = 10;
-
-    /* Parse args */
-    if (argc > 1) {
-        for (int8_t i = 1; i < argc; ++i) {
-            char * arg = argv[i];
-            /* Width */
-            if (strcmp(arg, "-w") == 0) {
-                if (i + 1 < argc) {
-                    ++i;
-                    width = atoi(argv[i]);
-                    if (width == 0 || width < 8) {
-                        /* Deafult is 10 */
-                        width = 10;
-                    }
-                }
-            /* Height */
-            } else if (strcmp(arg, "-h") == 0) {
-                if (i + 1 < argc) {
-                    ++i;
-                    height = atoi(argv[i]);
-                    if (height == 0 || height < 8) {
-                        /* Deafult is 10 */
-                        height = 10;
-                    }
-                }
-            }
-        }
-    }
 
     /* Cursor highlighting */
     init_pair(CURSOR, COLOR_BLACK, COLOR_RED);
@@ -83,7 +96,7 @@ int main(int argc, char ** argv) {
     p_grid->x_offset = 4;
     p_grid->mines = 0;
     p_grid->flags = 0;
-    p_grid->cursor = ((width * height) / 2);
+    p_grid->cursor = 0;
 
     /* Create minefield */
     int8_t * p_minefield = (int8_t *)malloc((width * height) * sizeof(int8_t));
