@@ -52,10 +52,10 @@ int main(int argc, char ** argv) {
                     return 1;
                 }
             } else if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
-                printf("Usage: %s\n-H height -> The height of the minefield. Default 10\n-W width -> The width of the minefield. Default 10\n", argv[0]);
+                printf("Usage: %s\n-H height -> The height of the minefield. Default 10\n-W width -> Height of the minefield. Default 10. Minimum 8\n", argv[0]);
                 return 0;
             } else {
-                fprintf(stderr, "Usage: %s\n-H height -> The height of the minefield. Default 10\n-W width -> The width of the minefield. Default 10\n", argv[0]);
+                fprintf(stderr, "Usage: %s\n-H height -> The height of the minefield. Default 10\n-W width -> Width of the minefield. Default 10. Minimum 8\n", argv[0]);
                 return 1;
             }
         }
