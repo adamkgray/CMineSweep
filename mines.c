@@ -84,37 +84,31 @@ void initialize_minefield(grid * p_grid) {
     int8_t * p_minefield = p_grid->minefield;
     for (int16_t i = 0; i < minefield_size; ++i) {
         /* Space is default empty, but has 4 chances to become a MINE */
-        *p_minefield = ((rand() & 1) && (rand() & 1) && (rand() & 1) && (rand() & 1) && (rand() & 1)) ? MINE : EMPTY;
+        *p_minefield = ((rand() & 1) && (rand() & 1) && (rand() & 1) && (rand() & 1)) ? MINE : EMPTY;
         /* Add some other mines around this mine */
         if (*p_minefield == MINE) {
             p_grid->mines += 1;
             /* Above */
-            /*
             if (i - width >= 0 && (rand() & 1)) {
                 if (*(p_minefield - width) != MINE) {
                     *(p_minefield - width) = MINE;
                     p_grid->mines += 1;
                 }
             }
-            */
             /* To the left */
-            /*
             if (i - 1 >= 0 && (rand() & 1)) {
                 if( *(p_minefield - 1) != MINE) {
                     *(p_minefield - 1) = MINE;
                     p_grid->mines += 1;
                 }
             }
-            */
             /* Above and to the left */
-            /*
             if (i - width - 1 >= 0 && (rand() & 1)) {
                 if (*(p_minefield - width - 1) != MINE) {
                     *(p_minefield - width - 1) = MINE;
                     p_grid->mines += 1;
                 }
             }
-            */
         }
         ++p_minefield;
     }

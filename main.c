@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ncurses.h>
 
 #include "grid.h"
@@ -28,6 +30,38 @@ int main(int argc, char ** argv) {
     /* Clear the terminal */
     clear();
 
+    /* Scale */
+    int8_t width = 10;
+    int8_t height = 10;
+
+    /* Parse args */
+    if (argc > 1) {
+        for (int8_t i = 1; i < argc; ++i) {
+            char * arg = argv[i];
+            /* Width */
+            if (strcmp(arg, "-w") == 0) {
+                if (i + 1 < argc) {
+                    ++i;
+                    width = atoi(argv[i]);
+                    if (width == 0 || width < 8) {
+                        /* Deafult is 10 */
+                        width = 10;
+                    }
+                }
+            /* Height */
+            } else if (strcmp(arg, "-h") == 0) {
+                if (i + 1 < argc) {
+                    ++i;
+                    height = atoi(argv[i]);
+                    if (height == 0 || height < 8) {
+                        /* Deafult is 10 */
+                        height = 10;
+                    }
+                }
+            }
+        }
+    }
+
     /* Cursor highlighting */
     init_pair(CURSOR, COLOR_BLACK, COLOR_RED);
     init_pair(FLAG, COLOR_BLACK, COLOR_YELLOW);
@@ -38,29 +72,27 @@ int main(int argc, char ** argv) {
     if (p_grid == NULL) {
         free(p_grid);
         endwin();
+        fprintf(stderr, "%s: not enough memory\n", argv[0]);
         return 1;
     }
-
-    /* Scale */
-    int8_t width = 15;
-    int8_t height = 15;
-    int16_t minefield_size = width * height;
 
     /* Dimensions, initial cursor placement, mines, flags */
     p_grid->width = width;
     p_grid->height = height;
-    p_grid->y_offset = ((LINES - 1) / 2) - (3 * height / 4);
-    p_grid->x_offset = ((COLS - 1) / 2) - width; 
+    p_grid->y_offset = 2;
+    p_grid->x_offset = 4;
     p_grid->mines = 0;
     p_grid->flags = 0;
-    p_grid->cursor = (minefield_size / 2);
+    p_grid->cursor = ((width * height) / 2);
 
     /* Create minefield */
-    int8_t * p_minefield = (int8_t *)malloc(minefield_size * sizeof(int8_t));
+    int8_t * p_minefield = (int8_t *)malloc((width * height) * sizeof(int8_t));
     /* Exit if allocation failed */
     if (p_minefield == NULL) {
+        free(p_grid);
         free(p_minefield);
         endwin();
+        fprintf(stderr, "%s: not enough memory\n", argv[0]);
         return 1;
     }
     p_grid->minefield = p_minefield;
