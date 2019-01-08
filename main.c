@@ -71,28 +71,6 @@ void render_mine(grid * p_grid, int16_t i, int8_t is_cursor) {
     }
 }
 
-void render_minefield(grid * p_grid) {
-    int8_t * p_minefield = p_grid->minefield;
-    for (int16_t i = 0; i < (p_grid->width * p_grid->height); ++i) {
-        /* Render covered mine to screen */
-        mvaddch(
-            p_grid->y_offset + (i / p_grid->width),
-            p_grid->x_offset + (2 * (i % p_grid->width)),
-            ACS_CKBOARD
-        );
-        /* Increment minefield pointer */
-        ++p_minefield;
-    }
-    /* Render cursor */
-    attron(COLOR_PAIR(CURSOR));
-    mvaddch(
-        p_grid->y_offset + (p_grid->cursor / p_grid->width),
-        p_grid->x_offset + (2 * (p_grid->cursor % p_grid->width)),
-        ACS_CKBOARD
-    );
-    attroff(COLOR_PAIR(CURSOR));
-}
-
 void reveal(grid * p_grid, int16_t i) {
     /* Return if the space is already uncovered */
     if ((p_grid->minefield[i] & UNCOVERED) || (p_grid->minefield[i] & MINE)) {
@@ -463,7 +441,26 @@ int main(int argc, char ** argv) {
     }
 
     /* Render minefield */
-    render_minefield(p_grid);
+    p_minefield = p_grid->minefield;
+    for (int16_t i = 0; i < (p_grid->width * p_grid->height); ++i) {
+        /* Render covered mine to screen */
+        mvaddch(
+            p_grid->y_offset + (i / p_grid->width),
+            p_grid->x_offset + (2 * (i % p_grid->width)),
+            ACS_CKBOARD
+        );
+        /* Increment minefield pointer */
+        ++p_minefield;
+    }
+
+    /* Render cursor */
+    attron(COLOR_PAIR(CURSOR));
+    mvaddch(
+        p_grid->y_offset + (p_grid->cursor / p_grid->width),
+        p_grid->x_offset + (2 * (p_grid->cursor % p_grid->width)),
+        ACS_CKBOARD
+    );
+    attroff(COLOR_PAIR(CURSOR));
 
     /* Refresh page to show initial render */
     refresh();
