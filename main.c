@@ -476,8 +476,8 @@ int main(int argc, char ** argv) {
     endwin();
 
     /* Free allocated memory before exiting */
+    free(p_grid->minefield);
     free(p_grid);
-    free(p_minefield);
 
     return 0;
 }
