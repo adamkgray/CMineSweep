@@ -11,4 +11,4 @@ clean:
 	rm minesweeper
 
 minesweeper:
-	$(CC) $(CFLAGS) -o minesweeper $(MAIN) $(CURSES)
+	$(CC) $(CFLAGS) -o ms $(MAIN) $(CURSES)

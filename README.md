@@ -10,6 +10,6 @@ Command line version of minesweeper written in C
 
 ### Executable
 
-To compile, run `make` in the source directory. It will produce an executable called `minesweeper`
+To compile, run `make` in the source directory. It will produce an executable called `ms`
 
-To run, do `./minesweeper`
+To run, do `./ms`
