@@ -9,12 +9,12 @@
 #include <ncurses.h>
 
 #define EMPTY       0       /* A space with no mines */
+#define CURSOR      1       /* Cursor coloring */
+#define FLAG        2       /* Flag coloring */
 #define VALUE       15      /* Mask to turn on only the bits that say how many adjacent mines there are */
 #define MINE        16      /* A space that contains a mine */
 #define UNCOVERED   32      /* Flag that indicates a space has been uncovered */
 #define FLAGGED     64      /* Flag that indicates a space has been flagged */
-#define CURSOR      1       /* Cursor coloring */
-#define FLAG        2       /* Flag coloring */
 
 typedef struct {
     int8_t width;
@@ -30,10 +30,12 @@ typedef struct {
 void render_mine(grid * p_grid, int16_t i, int8_t is_cursor) {
     /* Get value of space at i */
     int8_t space = p_grid->minefield[i];
+
     /* Turn on flag */
     if (space & FLAGGED) {
         attron(COLOR_PAIR(FLAG));
     }
+
     /* Turn on cursor */
     if (is_cursor) {
         /* Turn off flag if it's flagged */
@@ -42,6 +44,7 @@ void render_mine(grid * p_grid, int16_t i, int8_t is_cursor) {
         }
         attron(COLOR_PAIR(CURSOR));
     }
+
     /* Compute pixel value (ncurses ACS need 32 bits) */
     int32_t pixel = ACS_CKBOARD;
     if (space & UNCOVERED) {
@@ -57,12 +60,14 @@ void render_mine(grid * p_grid, int16_t i, int8_t is_cursor) {
     } else if (space & FLAGGED) {
         pixel = ACS_PLMINUS;
     }
+
     /* Do the rendering */
     mvaddch(
         p_grid->y_offset + (i / p_grid->width),
         p_grid->x_offset + (2 * (i % p_grid->width)),
         pixel
     );
+
     /* Turn of flag */
     if ((space & FLAGGED) && !is_cursor) {
         attroff(COLOR_PAIR(FLAG));
@@ -76,26 +81,33 @@ void reveal(grid * p_grid, int16_t i) {
     if ((p_grid->minefield[i] & UNCOVERED) || (p_grid->minefield[i] & MINE)) {
         return;
     }
+
     /* Unflag */
     p_grid->minefield[i] &= ~FLAGGED;
+
     /* Uncover */
     p_grid->minefield[i] |= UNCOVERED;
+
     /* Render the uncovered mine (with no cursor) */
     render_mine(p_grid, i, 0);
+
     /* If the space was empty, reveal all surrounding spaces */
     if ((p_grid->minefield[i] & VALUE) == EMPTY) {
         /* Above */
         if (i - p_grid->width >= 0) {
             reveal(p_grid, i - p_grid->width);
         }
+
         /* Below */
         if (i + p_grid->width < p_grid->width * p_grid->height) {
             reveal(p_grid, i + p_grid->width);
         }
+
         /* Right */
         if ((i + 1) % p_grid->width != 0) {
             reveal(p_grid, i + 1);
         }
+
         /* Left */
         if (i % p_grid->width != 0) {
             reveal(p_grid, i - 1);
@@ -270,6 +282,9 @@ int main(int argc, char ** argv) {
         }
     }
 
+    /* This value just makes some computations below easier to read :) */
+    int16_t minefield_size = width * height;
+
     /* Create screen */
     initscr();
     /* Disable default keyboard echo to screen */
@@ -308,7 +323,7 @@ int main(int argc, char ** argv) {
     p_grid->cursor = 0;
 
     /* Create minefield */
-    int8_t * p_minefield = (int8_t *)malloc((width * height) * sizeof(int8_t));
+    int8_t * p_minefield = (int8_t *)malloc((minefield_size) * sizeof(int8_t));
     /* Exit if allocation failed */
     if (p_minefield == NULL) {
         free(p_grid);
@@ -322,8 +337,7 @@ int main(int argc, char ** argv) {
     /* Seed rand function */
     srand(time(NULL));
 
-    /* This value just makes some computations below easier to read :) */
-    int16_t minefield_size = width * height;
+
     /* Fill minefield with mines */
     for (int16_t i = 0; i < minefield_size; ++i) {
         /* Space is default EMPTY, but has 4 chances to become a MINE */
@@ -355,6 +369,7 @@ int main(int argc, char ** argv) {
         }
         ++p_minefield;
     }
+
     /* Calculate all other spaces */
     p_minefield = p_grid->minefield;
     for (int16_t i = 0; i < minefield_size; ++i) {
@@ -410,31 +425,38 @@ int main(int argc, char ** argv) {
     mvaddch(p_grid->y_offset - 1, p_grid->x_offset + (2 * p_grid->width), ACS_URCORNER);
     mvaddch(p_grid->y_offset + p_grid->height, p_grid->x_offset - 2, ACS_LLCORNER);
     mvaddch(p_grid->y_offset + p_grid->height, p_grid->x_offset + (2 * p_grid->width), ACS_LRCORNER);
+
     /* Top line */
     for (int16_t i = p_grid->x_offset - 1; i < (2 * p_grid->width) + p_grid->x_offset; ++i) {
         mvaddch(p_grid->y_offset - 1, i, ACS_HLINE);
     }
+
     /* Bottom line */
     for (int16_t i = p_grid->x_offset - 1; i < (2 * p_grid->width) + p_grid->x_offset; ++i) {
         mvaddch(p_grid->y_offset + p_grid->height, i, ACS_HLINE);
     }
+
     /* Side lines */
     for (int16_t i = p_grid->y_offset; i < p_grid->y_offset + p_grid->height; ++i) {
         mvaddch(i, p_grid->x_offset - 2, ACS_VLINE);
         mvaddch(i, p_grid->x_offset + (2 * p_grid->width), ACS_VLINE);
     }
+
     /* Corners menu */
     mvaddch(p_grid->y_offset + p_grid->height + 2, p_grid->x_offset - 2, ACS_ULCORNER);
     mvaddch(p_grid->y_offset + p_grid->height + 2, p_grid->x_offset + (2 * p_grid->width), ACS_URCORNER);
     mvaddch(p_grid->y_offset + p_grid->height + 4, p_grid->x_offset - 2, ACS_LLCORNER);
     mvaddch(p_grid->y_offset + p_grid->height + 4, p_grid->x_offset + (2 * p_grid->width), ACS_LRCORNER);
+
     /* Side menu */
     mvaddch(p_grid->y_offset + p_grid->height + 3, p_grid->x_offset - 2, ACS_VLINE);
     mvaddch(p_grid->y_offset + p_grid->height + 3, p_grid->x_offset + (2 * p_grid->width), ACS_VLINE);
+
     /* Top menu */
     for (int16_t i = p_grid->x_offset - 1; i < p_grid->x_offset + (p_grid->width * 2); ++i) {
         mvaddch(p_grid->y_offset + p_grid->height + 2, i, ACS_HLINE);
     }
+
     /* Bottom menu */
     for (int16_t i = p_grid->x_offset - 1; i < p_grid->x_offset + (p_grid->width *2); ++i) {
         mvaddch(p_grid->y_offset + p_grid->height + 4, i, ACS_HLINE);
@@ -442,7 +464,7 @@ int main(int argc, char ** argv) {
 
     /* Render minefield */
     p_minefield = p_grid->minefield;
-    for (int16_t i = 0; i < (p_grid->width * p_grid->height); ++i) {
+    for (int16_t i = 0; i < (minefield_size); ++i) {
         /* Render covered mine to screen */
         mvaddch(
             p_grid->y_offset + (i / p_grid->width),
@@ -456,8 +478,8 @@ int main(int argc, char ** argv) {
     /* Render cursor */
     attron(COLOR_PAIR(CURSOR));
     mvaddch(
-        p_grid->y_offset + (p_grid->cursor / p_grid->width),
-        p_grid->x_offset + (2 * (p_grid->cursor % p_grid->width)),
+        p_grid->y_offset,
+        p_grid->x_offset,
         ACS_CKBOARD
     );
     attroff(COLOR_PAIR(CURSOR));
