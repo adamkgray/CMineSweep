@@ -16,6 +16,5 @@ To run, do `./ms`
 
 ### Possible future features
 * show number of moves made so far in status bar
-* enable movement with arrow keys
 * ask if the user wants to play again after game finishes (Play again? [Y/n])
 * enable variable mine density through command line args (--high-density | --low-density | --medium-density)

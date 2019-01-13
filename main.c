@@ -287,6 +287,8 @@ int main(int argc, char ** argv) {
 
     /* Create screen */
     initscr();
+    /* Read special characters (up, down, left and right arrows) */
+    keypad(stdscr, TRUE);
     /* Disable default keyboard echo to screen */
     noecho();
     /* Input is immediately available to program, no need for newline */
