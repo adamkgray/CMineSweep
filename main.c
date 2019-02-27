@@ -412,6 +412,43 @@ int main(int argc, char ** argv) {
         ++p_minefield;
     }
 
+    /* Render controls */
+    mvprintw(
+        p_grid->y_offset,
+        p_grid->x_offset + (2 * p_grid->width) + 3,
+        "q - quit"
+    );
+    mvprintw(
+        p_grid->y_offset + 2,
+        p_grid->x_offset + (2 * p_grid->width) + 3,
+        "h - left"
+    );
+    mvprintw(
+        p_grid->y_offset + 3,
+        p_grid->x_offset + (2 * p_grid->width) + 3,
+        "j - down"
+    );
+    mvprintw(
+        p_grid->y_offset + 4,
+        p_grid->x_offset + (2 * p_grid->width) + 3,
+        "k - up"
+    );
+    mvprintw(
+        p_grid->y_offset + 5,
+        p_grid->x_offset + (2 * p_grid->width) + 3,
+        "l - right"
+    );
+    mvprintw(
+        p_grid->y_offset + 7,
+        p_grid->x_offset + (2 * p_grid->width) + 3,
+        "d - dig"
+    );
+    mvprintw(
+        p_grid->y_offset + 8,
+        p_grid->x_offset + (2 * p_grid->width) + 3,
+        "f - flag"
+    );
+
     /* Render menu */
     mvprintw(
             p_grid->y_offset + p_grid->height + 3,
